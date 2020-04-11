@@ -1,0 +1,1077 @@
+
+<!-- saved from url=(0059)http://www.math.mun.ca/~dapike/FF23utils/trio-phase-top.php -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<script type="text/javascript">
+
+
+function pad_integer (num, width)
+   {
+   num_as_string = num.toString();
+   var i;
+   for (i=0 ; num_as_string.length + i < width ; i ++)
+      parent.bottom.document.write(" ");
+   }
+
+function report_SNP (chr_id, chr_number, SNP_position, genotypeA, genotypeB, genotypeC, rsidA, FFvs23)
+   {
+   if ((chr_number < 10) || (chr_number == 23))
+      parent.bottom.document.write(" ");
+   parent.bottom.document.write(chr_id);
+   comma ();
+   parent.bottom.document.write("  ");
+   parent.bottom.document.write(rsidA);
+   comma ();
+   var sps = 15-rsidA.length;
+   while (sps > 0)
+      {
+      parent.bottom.document.write(" ");
+      sps --;
+      }
+ 
+   pad_integer (SNP_position, 9);
+   if (FFvs23 > 0)
+      {
+      parent.bottom.document.write("<a href=\"https://www.23andme.com/you/explorer/chr/?chr=");
+      if (chr_number < 23)
+         parent.bottom.document.write(chr_number);
+      else if (chr_number == 23)
+         parent.bottom.document.write("X");
+      else if (chr_number == 24)
+         parent.bottom.document.write("Y");
+      else if (chr_number == 25)
+         parent.bottom.document.write("MT");
+      parent.bottom.document.write("&pos_start=" + SNP_position + "\" target=\"_new\">");
+      }
+   parent.bottom.document.write(SNP_position);
+   if (FFvs23 > 0)
+      parent.bottom.document.write("</a>");
+   comma ();
+   parent.bottom.document.write("      ");
+
+   if (genotypeB.length == 1)
+      parent.bottom.document.write(" ");
+   parent.bottom.document.write(genotypeB);
+   comma ();
+   parent.bottom.document.write ("     ");
+
+   if (genotypeA.length == 1)
+      parent.bottom.document.write(" ");
+   parent.bottom.document.write(genotypeA);
+   comma ();
+   parent.bottom.document.write ("     ");
+
+   if (genotypeC.length == 1)
+      parent.bottom.document.write(" ");
+   parent.bottom.document.write(genotypeC);
+   comma ();
+   parent.bottom.document.write ("        ");
+
+   parent.bottom.document.write("    ");
+   print_phased_SNP (chr_number,genotypeA,genotypeB,genotypeC);
+
+   parent.bottom.document.write("\n");
+   }
+
+
+function comma ()
+   {
+   var InsertCommas = document.Comp_form.AddCommas.value;
+   if (InsertCommas == "N")
+      parent.bottom.document.write(" ");
+   else
+      parent.bottom.document.write(",");
+   //parent.bottom.document.write("<font color=\"#BCCC9D\">,</font>");
+   }
+
+
+function print_phased_SNP (chr_number, genotypeA, genotypeB, genotypeC)
+   {
+   var mat = " ";
+   var pat = " ";
+   var mat_comp = " ";
+   var pat_comp = " ";
+   var annotation = "";
+
+   if (is_discordant_SNP (chr_number, genotypeA, genotypeB, genotypeC))
+      {
+      pat = "?";
+      mat = "?";
+      pat_comp = "?";
+      mat_comp = "?";
+      annotation = "discordant";
+      }
+   else if ((genotypeA == "??") || (genotypeB == "??") || (genotypeC == "??"))
+      {
+      annotation = "No-Call";
+      if ((genotypeA.length == 2) && (genotypeB.length == 2) && (genotypeC.length == 2))
+         {
+	 if ((genotypeC != "??") && (genotypeC.charAt(0) == genotypeC.charAt(1)))
+            {
+	    pat = genotypeC.charAt(0);
+	    mat = genotypeC.charAt(1);
+	    }
+	 else if ((genotypeC != "??") && (genotypeA != "??") && (genotypeA.charAt(0) == genotypeA.charAt(1)))
+                  {
+                  if (genotypeA.charAt(0) == genotypeC.charAt(0))
+		     {
+		     pat = genotypeC.charAt(0);
+		     mat = genotypeC.charAt(1);
+                     }
+                  else
+		     {
+		     pat = genotypeC.charAt(1);
+		     mat = genotypeC.charAt(0);
+		     }
+		  }
+	 else if ((genotypeC != "??") && (genotypeB != "??") && (genotypeB.charAt(0) == genotypeB.charAt(1)))
+                  {
+                  if (genotypeB.charAt(0) == genotypeC.charAt(1))
+		     {
+		     pat = genotypeC.charAt(0);
+		     mat = genotypeC.charAt(1);
+		     }
+                  else
+		     {
+		     pat = genotypeC.charAt(1);
+		     mat = genotypeC.charAt(0);
+		     }
+		  }
+	 else if ((genotypeC != "??") && (genotypeA != "??") && (genotypeA != genotypeC))
+                  {
+                  if (genotypeA.charAt(0) == genotypeC.charAt(0))
+		     {
+		     pat = genotypeC.charAt(0);
+		     mat = genotypeC.charAt(1);
+		     }
+                  else
+		     {
+		     pat = genotypeC.charAt(1);
+		     mat = genotypeC.charAt(0);
+		     }
+		  }
+	 else if ((genotypeC != "??") && (genotypeB != "??") && (genotypeB != genotypeC))
+                  {
+                  if (genotypeB.charAt(0) == genotypeC.charAt(1))
+		     {
+		     pat = genotypeC.charAt(0);
+		     mat = genotypeC.charAt(1);
+		     }
+                  else
+		     {
+		     pat = genotypeC.charAt(1);
+		     mat = genotypeC.charAt(0);
+		     }
+		  }
+         else if ((genotypeC == "??") && (genotypeA != "??") && (genotypeB != "??"))
+                  {
+                  if (genotypeA.charAt(0) == genotypeA.charAt(1))
+		     {
+		     pat = genotypeA.charAt(0);
+		     }
+		  else
+		     {
+		     pat = "?";
+		     }
+                  if (genotypeB.charAt(0) == genotypeB.charAt(1))
+		     {
+		     mat = genotypeB.charAt(0);
+		     }
+		  else
+		     {
+		     mat = "?";
+		     }
+		  }
+         else if ((genotypeC == "??") && (genotypeA != "??") && (genotypeB == "??"))
+                  {
+                  if (genotypeA.charAt(0) == genotypeA.charAt(1))
+		     {
+		     pat = genotypeA.charAt(0);
+		     mat = "?";
+		     }
+		  else
+		     {
+		     pat = "?";
+		     mat = "?";
+		     }
+		  }
+         else if ((genotypeC == "??") && (genotypeA == "??") && (genotypeB != "??"))
+                  {
+                  if (genotypeB.charAt(0) == genotypeB.charAt(1))
+		     {
+		     pat = "?";
+		     mat = genotypeB.charAt(0);
+		     }
+		  else
+		     {
+		     pat = "?";
+		     mat = "?";
+		     }
+		  }
+         else
+            {
+            pat = "?";
+	    mat = "?";
+	    }
+	 }
+      else if ((chr_number == 23) && (genotypeC == "??"))
+              {
+              if (genotypeB.charAt(0) == genotypeB.charAt(1))
+                 {
+                 pat = "?";
+                 mat = genotypeB.charAt(0);
+		 }
+              else
+                 {
+                 pat = "?";
+		 mat = "?";
+		 }
+	      }
+      else if ((chr_number == 23) && (genotypeC.length == 1))
+              {
+	      mat = genotypeC.charAt(0);
+	      }
+      else
+         {
+         pat = "?";
+         mat = "?";
+         }
+      }
+   else // all three SNPs have values
+      {
+      if ((genotypeA.length == 2) && (genotypeB.length == 2) && (genotypeC.length == 2))
+         {
+         if (genotypeC.charAt(0) == genotypeC.charAt(1))
+	    {
+	    pat = genotypeC.charAt(0);
+	    mat = genotypeC.charAt(1);
+	    }
+	 else if (genotypeA.charAt(0) == genotypeA.charAt(1))
+                  {
+                  if (genotypeA.charAt(0) == genotypeC.charAt(0))
+	             {
+		     pat = genotypeC.charAt(0);
+		     mat = genotypeC.charAt(1);
+		     }
+                  else
+	             {
+		     pat = genotypeC.charAt(1);
+		     mat = genotypeC.charAt(0);
+		     }
+		  }
+	 else if (genotypeB.charAt(0) == genotypeB.charAt(1))
+                  {
+                  if (genotypeB.charAt(0) == genotypeC.charAt(1))
+	             {
+		     pat = genotypeC.charAt(0);
+		     mat = genotypeC.charAt(1);
+		     }
+                  else
+	             {
+		     pat = genotypeC.charAt(1);
+		     mat = genotypeC.charAt(0);
+		     }
+		  }
+	 else if (genotypeA != genotypeC)
+                  {
+                  if (genotypeA.charAt(0) == genotypeC.charAt(0))
+	             {
+		     pat = genotypeC.charAt(0);
+		     mat = genotypeC.charAt(1);
+		     }
+                  else
+	             {
+		     pat = genotypeC.charAt(1);
+		     mat = genotypeC.charAt(0);
+		     }
+		  }
+	 else if (genotypeB != genotypeC)
+                  {
+                  if (genotypeB.charAt(0) == genotypeC.charAt(1))
+	             {
+		     pat = genotypeC.charAt(0);
+		     mat = genotypeC.charAt(1);
+		     }
+                  else
+	             {
+		     pat = genotypeC.charAt(1);
+		     mat = genotypeC.charAt(0);
+		     }
+		  }
+         else // the child is heterozygous and identical to both parents 
+              {
+              pat = "?";
+	      mat = "?";
+	      annotation = "indeterminate";
+	      }
+	 }
+      else if ((genotypeA.length == 1) && (genotypeB.length == 2) && (genotypeC.length == 2))
+              {
+	      // this is probably a female's X
+              if (genotypeA.charAt(0) == genotypeC.charAt(0))
+                 {
+		 pat = genotypeC.charAt(0);
+		 mat = genotypeC.charAt(1);
+		 }
+              else
+                 {
+		 pat = genotypeC.charAt(1);
+		 mat = genotypeC.charAt(0);
+		 }
+	      if (chr_number != 23)
+                 {
+		 annotation = "something is odd ... X Chromosome was anticipated";
+		 }
+	      }
+      else if ((genotypeB.length == 2) && (genotypeC.length == 1))
+              {
+	      // this is probably a male's X
+	      mat = genotypeC.charAt(0);
+	      if (chr_number != 23)
+	         {
+		 annotation = "something is odd ... X Chromosome was expected";
+		 }
+	      }
+      else
+         {      
+	 annotation = "XXX this needs attention";
+	 }      
+      }
+   parent.bottom.document.write(mat);
+   comma ();
+   parent.bottom.document.write("  ");
+   parent.bottom.document.write(pat);
+   comma ();
+
+if (annotation.length > 19)
+   {
+   parent.bottom.document.write(" ");
+   parent.bottom.document.write(annotation);
+   parent.bottom.document.write("\n");
+   parent.bottom.document.write("Terminating.\n");
+   parent.bottom.document.close();
+   return(0);
+   }
+
+   var sps = 19-annotation.length;
+   while (sps > 0)
+      {
+      parent.bottom.document.write(" ");
+      sps --;
+      }
+   parent.bottom.document.write(annotation);
+   comma ();
+
+   if (pat_comp != "?")
+      pat_comp = get_comp (genotypeA, pat);
+   if (mat_comp != "?")
+      mat_comp = get_comp (genotypeB, mat);
+
+   parent.bottom.document.write("     ");
+   parent.bottom.document.write(mat_comp);
+   comma ();
+   parent.bottom.document.write("  ");
+   parent.bottom.document.write(pat_comp);
+   }
+
+
+function get_comp (genotype, allele)
+   {
+   if (genotype.length == 2)
+      {
+      if (allele == "?")
+         if (genotype.charAt(0) == genotype.charAt(1))
+	    return (genotype.charAt(0));
+         else
+            return ("?");
+      else if (genotype.charAt(0) == allele)
+         return (genotype.charAt(1));
+      else
+         return (genotype.charAt(0));
+      }
+   else
+      {
+      if (genotype == allele)
+         return (" ");
+      else if (allele != "?")
+         return (genotype);
+      else
+         return ("?");
+      }
+   }
+
+
+function is_discordant_SNP (chr_number, genotypeA, genotypeB, genotypeC)
+   {
+   var retcode = 0;
+ 
+   if ((chr_number != 23) || (genotypeC.length == 2)) // either not X, or else a female X
+      if (is_SNP_mutated (genotypeA, genotypeC))
+         retcode = 1;
+
+   if (retcode == 0)
+      if (is_SNP_mutated (genotypeB, genotypeC))
+         retcode = 1;
+
+   if (retcode == 0)
+      if ((genotypeA != "??") && (genotypeB != "??") && (genotypeC != "??"))
+         if ((genotypeA.length == 2) && (genotypeB.length == 2) && (genotypeC.length == 2))
+            {
+            retcode = 1;
+            if ((is_allele_in_SNP (genotypeC.charAt(0), genotypeA)) && (is_allele_in_SNP (genotypeC.charAt(1), genotypeB)))
+               retcode = 0;
+            if ((is_allele_in_SNP (genotypeC.charAt(0), genotypeB)) && (is_allele_in_SNP (genotypeC.charAt(1), genotypeA)))
+               retcode = 0;
+            }
+   return (retcode);
+   }
+
+
+
+function is_allele_in_SNP (allele, SNP)
+   {
+   if ((SNP.charAt(0) == allele) || (SNP.charAt(1) == allele))
+      return (1);
+   return (0);
+   }
+
+
+function is_SNP_mutated (genotypeA, genotypeB)
+   {
+   var retcode = 0;
+   if (genotypeA == genotypeB)
+      ;
+   else if ((genotypeA == "??") || (genotypeB == "??"))
+      ;
+   else if ((genotypeA.length == 1) && (genotypeB.length == 1))
+      {
+      retcode = 1;
+      }
+   else if ((genotypeA.length == 1) && (genotypeB.length == 2))
+      {
+      if (genotypeA.charAt(0) == genotypeB.charAt(0))
+         ;
+      else if (genotypeA.charAt(0) == genotypeB.charAt(1))
+         ;
+      else
+         {
+         retcode = 1;
+         }
+      }
+   else if ((genotypeA.length == 2) && (genotypeB.length == 1))
+      {
+      if (genotypeB.charAt(0) == genotypeA.charAt(0))
+         ;
+      else if (genotypeB.charAt(0) == genotypeA.charAt(1))
+         ;
+      else
+         {
+         retcode = 1;
+         }
+      }
+   else
+      {
+      if (genotypeA.charAt(0) == genotypeB.charAt(0))
+         ;
+      else if (genotypeA.charAt(0) == genotypeB.charAt(1))
+         ;
+      else if (genotypeA.charAt(1) == genotypeB.charAt(0))
+         ;
+      else if (genotypeA.charAt(1) == genotypeB.charAt(1))
+         ;
+      else
+         {
+         retcode = 1;
+         }
+      }
+   return (retcode);
+   }
+
+
+
+
+function which_file_to_skip (chr_id, chr_idB, chr_idC, SNP_position, SNP_positionB, SNP_positionC)
+   {
+   var file_to_read;
+   var curr_chr_number;
+   var curr_chr_numberB;
+   var curr_chr_numberC;
+
+   // parent.bottom.document.write(SNP_position + "  " + SNP_positionB + "  " + SNP_positionC +"\n");
+
+   if (chr_id == "MT")
+      curr_chr_number = 25;
+   else if (chr_id == "X")
+      curr_chr_number = 23;
+   else if (chr_id == "Y")
+      curr_chr_number = 24;
+   else
+      curr_chr_number = parseInt(chr_id);
+
+   if (chr_idB == "MT")
+      curr_chr_numberB = 25;
+   else if (chr_idB == "X")
+      curr_chr_numberB = 23;
+   else if (chr_idB == "Y")
+      curr_chr_numberB = 24;
+   else
+      curr_chr_numberB = parseInt(chr_idB);
+
+   if (chr_idC == "MT")
+      curr_chr_numberC = 25;
+   else if (chr_idC == "X")
+      curr_chr_numberC = 23;
+   else if (chr_idC == "Y")
+      curr_chr_numberC = 24;
+   else
+      curr_chr_numberC = parseInt(chr_idC);
+
+   // parent.bottom.document.write(chr_id + "  " + chr_idB + "  " + chr_idC +"\n");
+   // parent.bottom.document.write(curr_chr_number + "  " + curr_chr_numberB + "  " + curr_chr_numberC +"\n");
+
+   if (curr_chr_number < curr_chr_numberB)
+      file_to_read = 1;
+   else if (curr_chr_number < curr_chr_numberC)
+      file_to_read = 1;
+   else if (curr_chr_numberB < curr_chr_number)
+      file_to_read = 2;
+   else if (curr_chr_numberB < curr_chr_numberC)
+      file_to_read = 2;
+   else if (curr_chr_numberC < curr_chr_number)
+      file_to_read = 3;
+   else if (curr_chr_numberC < curr_chr_numberB)
+      file_to_read = 3;
+   else // all three are for the same Chromosome
+      if (parseInt(SNP_position) < parseInt(SNP_positionB))
+         file_to_read = 1;
+      else if (parseInt(SNP_position) < parseInt(SNP_positionC))
+         file_to_read = 1;
+      else if (parseInt(SNP_positionB) < parseInt(SNP_position))
+         file_to_read = 2;
+      else if (parseInt(SNP_positionB) < parseInt(SNP_positionC))
+         file_to_read = 2;
+      else if (parseInt(SNP_positionC) < parseInt(SNP_position))
+         file_to_read = 3;
+      else
+         file_to_read = 3;
+
+   
+//   parent.bottom.document.write("Skipping SNP in File " + file_to_read);
+//   if (file_to_read == 1)
+//      parent.bottom.document.write("  " + chr_id + "  " + SNP_position + "\n");
+//   else if (file_to_read == 2)
+//      parent.bottom.document.write("  " + chr_idB + "  " + SNP_positionB + "\n");
+//   else
+//      parent.bottom.document.write("  " + chr_idC + "  " + SNP_positionC + "\n");
+
+   return (file_to_read);
+   }
+
+
+function ProcessFilesFirefox(fileA,fileB,fileC)
+   {
+   if ((fileA.length != 1) || (fileB.length != 1) || (fileC.length != 1))
+      {
+      parent.bottom.document.write("A file must be specified \n");
+      parent.bottom.document.close();
+      return(0);
+      }
+
+   var fnameA = fileA[0].name;
+   var fnameB = fileB[0].name;
+   var fnameC = fileC[0].name;
+   parent.bottom.document.write("<body bgcolor=\"#BCCC9D\">");
+   parent.bottom.document.write("Files to be processed:<br>Mother:  " + fnameB + "<br>Father:  " + fnameA + "<br>Child:   " + fnameC + "<br><br>");
+
+   var reader = new FileReader();
+   reader.onloadend = function() { //parent.bottom.document.write("QWER");
+                                   ProcessFilesFirefoxStep2 (fileA,fileB,fileC,reader.result);
+                                 };
+   reader.readAsText (fileA[0]);
+   return;
+   }
+
+
+function ProcessFilesFirefoxStep2(fileA,fileB,fileC,dataA)
+   {
+   var reader = new FileReader();
+   reader.onloadend = function() { //parent.bottom.document.write("QWER");
+                                   ProcessFilesFirefoxStep3 (fileA,fileB,fileC,dataA,reader.result);
+                                 };
+   reader.readAsText (fileB[0]);
+   return;
+   }
+
+
+function ProcessFilesFirefoxStep3(fileA,fileB,fileC,dataA,dataB)
+   {
+   var reader = new FileReader();
+   reader.onloadend = function() { //parent.bottom.document.write("QWER");
+                                   ProcessFilesFirefoxStep4 (fileA,fileB,fileC,dataA,dataB,reader.result);
+                                 };
+   reader.readAsText (fileC[0]);
+   return;
+   }
+
+
+
+function ProcessFilesFirefoxStep4(fileA,fileB,fileC,dataA,dataB,dataC)
+   {
+   // parent.bottom.document.write(navigator.appName);
+
+   var fnameA = fileA[0].name;
+   var fnameB = fileB[0].name;
+   var fnameC = fileC[0].name;
+
+   var TargetChr = document.Comp_form.Chromosome.value;
+//   var TargetStartPosition = parseInt(document.Comp_form.StartPosition.value);
+//   var TargetLength = parseInt(document.Comp_form.Length.value);
+
+
+   //parent.bottom.document.write("<body bgcolor=\"#BCCC9D\">");
+   //parent.bottom.document.write("Files to be processed:<br>" + fnameA + "<br>" + fnameB + "<br>" + fnameC + "<br><br>");
+
+
+   var treat_nocalls_as_match = 1;
+   var SNP_cnt = 0;
+
+
+   //parent.bottom.document.write("<p>");
+   parent.bottom.document.write("<pre>\n");
+   parent.bottom.document.write("Chr  RSid             Position     Mother  Father  Child         Child Phased");
+   parent.bottom.document.write("                   Uninherited\n");
+
+   var i;
+   var within_target_run = 0;
+   var run_length = 0;
+   var curr_chr_number = 0;
+   var curr_chr_numberB;
+   var prev_chr_number = -1;
+
+   // split the files up into lines at the CR=13 and LF=10=\n characters
+   var dataA_lines = dataA.split("\n");  // split up the file into lines
+   var dataB_lines = dataB.split("\n");  // split up the file into lines
+   var dataC_lines = dataC.split("\n");  // split up the file into lines
+
+   var FFvs23A = 0;
+   var FFvs23B = 0;
+   var FFvs23C = 0;
+   var line_noA = 0;
+   var line_noB = 0;
+   var line_noC = 0;
+   while ((line_noA < dataA_lines.length -1) && (line_noB < dataB_lines.length -1) && (line_noC < dataC_lines.length -1))
+      {
+      var input_lineA = dataA_lines[line_noA];
+      var input_lineB = dataB_lines[line_noB];
+      var input_lineC = dataC_lines[line_noC];
+   
+      if (line_noA == 0)
+         if (input_lineA.charAt(0) == "#")
+            FFvs23A = 23; // the file is from 23andMe
+      if (line_noB == 0)
+         if (input_lineB.charAt(0) == "#")
+            FFvs23B = 23; // the file is from 23andMe
+      if (line_noC == 0)
+         if (input_lineC.charAt(0) == "#")
+            FFvs23C = 23; // the file is from 23andMe
+
+      if (FFvs23A == 23)
+         while (input_lineA.charAt(0) == "#")
+            {
+            line_noA ++;
+            input_lineA = dataA_lines[line_noA];
+            }
+      else
+         while (input_lineA.charAt(0) == "R")
+            {
+            line_noA ++;
+            input_lineA = dataA_lines[line_noA];
+            }
+      if (FFvs23B == 23)
+         while (input_lineB.charAt(0) == "#")
+            {
+            line_noB ++;
+            input_lineB = dataB_lines[line_noB];
+            }
+      else
+         while (input_lineB.charAt(0) == "R")
+            {
+            line_noB ++;
+            input_lineB = dataB_lines[line_noB];
+            }
+      if (FFvs23C == 23)
+         while (input_lineC.charAt(0) == "#")
+            {
+            line_noC ++;
+            input_lineC = dataC_lines[line_noC];
+            }
+      else
+         while (input_lineC.charAt(0) == "R")
+            {
+            line_noC ++;
+            input_lineC = dataC_lines[line_noC];
+            }
+
+      // the substring stuff below is to compensate for a CarriageReturn that is left at the end of each line
+      input_lineA = input_lineA.substr(0, input_lineA.length - 1);
+      input_lineB = input_lineB.substr(0, input_lineB.length - 1);
+      input_lineC = input_lineC.substr(0, input_lineC.length - 1);
+
+      var input_dataA;
+      var input_dataB;
+      var input_dataC;
+      var rsidA;
+      var rsidB;
+      var rsidC;
+      var chr_id;
+      var chr_idB;
+      var chr_idC;
+      var SNP_position;
+      var SNP_positionB;
+      var SNP_positionC;
+      var genotypeA;
+      var genotypeB;
+      var genotypeC;
+
+      if (FFvs23A == 23)
+          {
+          input_dataA = input_lineA.split("\t");  // the tab character is the delimiter
+          rsidA = input_dataA[0];
+          chr_id = input_dataA[1];
+          SNP_position = input_dataA[2];
+          genotypeA = input_dataA[3];
+          }
+      else if (input_lineA.charAt(0) == "\"")
+          {
+          input_dataA = input_lineA.split(",");  // the comma character is the delimiter
+          rsidA = input_dataA[0].substr(1,input_dataA[0].length -2);
+          chr_id = input_dataA[1].substr(1,input_dataA[1].length -2);
+          SNP_position = input_dataA[2].substr(1,input_dataA[2].length -2);
+          genotypeA = input_dataA[3].substr(1,input_dataA[3].length -2);
+          }
+      else
+          {
+          input_dataA = input_lineA.split(" ");  // the space character is the delimiter
+          rsidA = input_dataA[0];
+          chr_id = input_dataA[1];
+          SNP_position = input_dataA[2];
+          genotypeA = input_dataA[3];
+          }
+
+      if (FFvs23B == 23)
+          {
+          input_dataB = input_lineB.split("\t");  // the tab character is the delimiter
+          rsidB = input_dataB[0];
+          chr_idB = input_dataB[1];
+          SNP_positionB = input_dataB[2];
+          genotypeB = input_dataB[3];
+          }
+      else if (input_lineB.charAt(0) == "\"")
+          {
+          input_dataB = input_lineB.split(",");  // the comma character is the delimiter
+          rsidB = input_dataB[0].substr(1,input_dataB[0].length -2);
+          chr_idB = input_dataB[1].substr(1,input_dataB[1].length -2);
+          SNP_positionB = input_dataB[2].substr(1,input_dataB[2].length -2);
+          genotypeB = input_dataB[3].substr(1,input_dataB[3].length -2);
+          }
+      else
+          {
+          input_dataB = input_lineB.split(" ");  // the space character is the delimiter
+          rsidB = input_dataB[0];
+          chr_idB = input_dataB[1];
+          SNP_positionB = input_dataB[2];
+          genotypeB = input_dataB[3];
+          }
+
+      if (FFvs23C == 23)
+          {
+          input_dataC = input_lineC.split("\t");  // the tab character is the delimiter
+          rsidC = input_dataC[0];
+          chr_idC = input_dataC[1];
+          SNP_positionC = input_dataC[2];
+          genotypeC = input_dataC[3];
+          }
+      else if (input_lineC.charAt(0) == "\"")
+          {
+          input_dataC = input_lineC.split(",");  // the comma character is the delimiter
+          rsidC = input_dataC[0].substr(1,input_dataC[0].length -2);
+          chr_idC = input_dataC[1].substr(1,input_dataC[1].length -2);
+          SNP_positionC = input_dataC[2].substr(1,input_dataC[2].length -2);
+          genotypeC = input_dataC[3].substr(1,input_dataC[3].length -2);
+          }
+      else
+          {
+          input_dataC = input_lineC.split(" ");  // the space character is the delimiter
+          rsidC = input_dataC[0];
+          chr_idC = input_dataC[1];
+          SNP_positionC = input_dataC[2];
+          genotypeC = input_dataC[3];
+          }
+
+      while (((rsidA != rsidB) || (rsidA != rsidC) || (rsidB != rsidC))
+             && (input_dataA[2] != undefined) && (input_dataB[2] != undefined) && (input_dataC[2] != undefined))
+         {
+//         parent.bottom.document.write("Files are not synchronised\n");
+//         parent.bottom.document.write("File 1 has Chr " + input_dataA[1] + " and position " + input_dataA[2] + "\n");
+//         parent.bottom.document.write("File 2 has Chr " + input_dataB[1] + " and position " + input_dataB[2] + "\n");
+         var file_to_read = which_file_to_skip (chr_id, chr_idB, chr_idC, SNP_position, SNP_positionB, SNP_positionC);
+
+         if (file_to_read == 1)
+            {
+            // read from first file
+//            parent.bottom.document.write("Skipping File 1 Chr " + input_dataA[1] + " position " + input_dataA[2] + "\n");
+            line_noA ++;
+            input_lineA = dataA_lines[line_noA];
+            input_lineA = input_lineA.substr(0, input_lineA.length - 1);
+
+            if (FFvs23A == 23)
+               {
+               input_dataA = input_lineA.split("\t");  // the tab character is the delimiter
+               rsidA = input_dataA[0];
+               chr_id = input_dataA[1];
+               SNP_position = input_dataA[2];
+               genotypeA = input_dataA[3];
+               }
+            else if (input_lineA.charAt(0) == "\"")
+               {
+               input_dataA = input_lineA.split(",");  // the comma character is the delimiter
+               rsidA = input_dataA[0].substr(1,input_dataA[0].length -2);
+               chr_id = input_dataA[1].substr(1,input_dataA[1].length -2);
+               SNP_position = input_dataA[2].substr(1,input_dataA[2].length -2);
+               genotypeA = input_dataA[3].substr(1,input_dataA[3].length -2);
+               }
+            else
+               {
+               input_dataA = input_lineA.split(" ");  // the space character is the delimiter
+               rsidA = input_dataA[0];
+               chr_id = input_dataA[1];
+               SNP_position = input_dataA[2];
+               genotypeA = input_dataA[3];
+               }
+
+            }
+         else if (file_to_read == 2)
+            {
+            // read from second file
+//            parent.bottom.document.write("Skipping File 2 Chr " + input_dataB[1] + " position " + input_dataB[2] + "\n");
+            line_noB ++;
+            input_lineB = dataB_lines[line_noB];
+            input_lineB = input_lineB.substr(0, input_lineB.length - 1);
+
+            if (FFvs23B == 23)
+               {
+               input_dataB = input_lineB.split("\t");  // the tab character is the delimiter
+               rsidB = input_dataB[0];
+               chr_idB = input_dataB[1];
+               SNP_positionB = input_dataB[2];
+               genotypeB = input_dataB[3];
+               }
+            else if (input_lineB.charAt(0) == "\"")
+               {
+               input_dataB = input_lineB.split(",");  // the comma character is the delimiter
+               rsidB = input_dataB[0].substr(1,input_dataB[0].length -2);
+               chr_idB = input_dataB[1].substr(1,input_dataB[1].length -2);
+               SNP_positionB = input_dataB[2].substr(1,input_dataB[2].length -2);
+               genotypeB = input_dataB[3].substr(1,input_dataB[3].length -2);
+               }
+            else
+               {
+               input_dataB = input_lineB.split(" ");  // the space character is the delimiter
+               rsidB = input_dataB[0];
+               chr_idB = input_dataB[1];
+               SNP_positionB = input_dataB[2];
+               genotypeB = input_dataB[3];
+               }
+
+            }
+         else
+            {
+            // read from second file
+//            parent.bottom.document.write("Skipping File 2 Chr " + input_dataB[1] + " position " + input_dataB[2] + "\n");
+            line_noC ++;
+            input_lineC = dataC_lines[line_noC];
+            input_lineC = input_lineC.substr(0, input_lineC.length - 1);
+
+            if (FFvs23C == 23)
+               {
+               input_dataC = input_lineC.split("\t");  // the tab character is the delimiter
+               rsidC = input_dataC[0];
+               chr_idC = input_dataC[1];
+               SNP_positionC = input_dataC[2];
+               genotypeC = input_dataC[3];
+               }
+            else if (input_lineC.charAt(0) == "\"")
+               {
+               input_dataC = input_lineC.split(",");  // the comma character is the delimiter
+               rsidC = input_dataC[0].substr(1,input_dataC[0].length -2);
+               chr_idC = input_dataC[1].substr(1,input_dataC[1].length -2);
+               SNP_positionC = input_dataC[2].substr(1,input_dataC[2].length -2);
+               genotypeC = input_dataC[3].substr(1,input_dataC[3].length -2);
+               }
+            else
+               {
+               input_dataC = input_lineC.split(" ");  // the space character is the delimiter
+               rsidC = input_dataC[0];
+               chr_idC = input_dataC[1];
+               SNP_positionC = input_dataC[2];
+               genotypeC = input_dataC[3];
+               }
+
+            }
+         } // end while... we now have identical rsid's, or we've exhausted the input
+
+if ((line_noA < dataA_lines.length -1) && (line_noB < dataB_lines.length -1) && (line_noC < dataC_lines.length -1))
+{
+
+      if (chr_id == "MT") 
+         curr_chr_number = 25;
+      else if (chr_id == "X") 
+         curr_chr_number = 23;
+      else if (chr_id == "Y")
+         curr_chr_number = 24;
+      else 
+         curr_chr_number = parseInt(chr_id);
+
+      //if ((FFvs23A == 23) && (genotypeA == "--")) genotypeA = "??";
+      if (genotypeA == "---") genotypeA = "??";
+      else if (genotypeA == "--") genotypeA = "??";
+      else if (genotypeA == "CA") genotypeA = "AC";
+      else if (genotypeA == "GA") genotypeA = "AG";
+      else if (genotypeA == "GC") genotypeA = "CG";
+      else if (genotypeA == "TA") genotypeA = "AT";
+      else if (genotypeA == "TC") genotypeA = "CT";
+      else if (genotypeA == "TG") genotypeA = "GT";
+
+      //if ((FFvs23B == 23) && (genotypeB == "--")) genotypeB = "??";
+      if (genotypeB == "---") genotypeB = "??";
+      else if (genotypeB == "--") genotypeB = "??";
+      else if (genotypeB == "CA") genotypeB = "AC";
+      else if (genotypeB == "GA") genotypeB = "AG";
+      else if (genotypeB == "GC") genotypeB = "CG";
+      else if (genotypeB == "TA") genotypeB = "AT";
+      else if (genotypeB == "TC") genotypeB = "CT";
+      else if (genotypeB == "TG") genotypeB = "GT";
+
+      //if ((FFvs23C == 23) && (genotypeC == "--")) genotypeC = "??";
+      if (genotypeC == "---") genotypeC = "??";
+      else if (genotypeC == "--") genotypeC = "??";
+      else if (genotypeC == "CA") genotypeC = "AC";
+      else if (genotypeC == "GA") genotypeC = "AG";
+      else if (genotypeC == "GC") genotypeC = "CG";
+      else if (genotypeC == "TA") genotypeC = "AT";
+      else if (genotypeC == "TC") genotypeC = "CT";
+      else if (genotypeC == "TG") genotypeC = "GT";
+      
+
+
+
+      if (chr_id == TargetChr)
+         {
+         report_SNP (chr_id, curr_chr_number, SNP_position, genotypeA, genotypeB, genotypeC, rsidA, FFvs23A+FFvs23B+FFvs23C);
+         SNP_cnt ++;      
+	 }
+
+      prev_chr_number = curr_chr_number;
+      prev_SNP_position = SNP_position;
+      line_noA ++;
+      line_noB ++;
+      line_noC ++;
+}
+      } // end while
+
+
+   parent.bottom.document.write("\n");
+   parent.bottom.document.write(SNP_cnt + " SNPs were processed for Chromosome " + TargetChr);
+   parent.bottom.document.write("</pre>");
+   parent.bottom.document.write("Processing Completed.\n<p>");
+   parent.bottom.document.close();
+   }
+
+
+
+function ProcessFilesMSIE()
+   {
+   parent.bottom.document.write("Not yet available for MSIE... try using Chrome\n<p>");
+   }
+
+
+</script>
+
+
+
+
+
+
+
+</head>
+<body bgcolor="#CCCCCC">
+
+<h3>Phase a Child when given data for child and both parents </h3>
+
+<form name="Comp_form" method="post">
+Unzipped Text File with Raw Data for Mother:
+<input type="file" size="60" id="RawDataFileB">
+<p>
+Unzipped Text File with Raw Data for Father:
+<input type="file" size="60" id="RawDataFileA">
+</p><p>
+Unzipped Text File with Raw Data for Child:
+<input type="file" size="60" id="RawDataFileC">
+</p><p>
+Chromosome to Phase:
+<select name="Chromosome">
+<option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option>
+<option value="6">6</option>
+<option value="7">7</option>
+<option value="8">8</option>
+<option value="9">9</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="X">X</option>
+</select>
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+Insert Commas?
+<select name="AddCommas">
+<option value="N">No</option>
+<option value="Y">Yes</option>
+</select>
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+
+<input type="button" onclick="ProcessFilesFirefox(RawDataFileA.files,RawDataFileB.files,RawDataFileC.files)" value="Click Here to Process the Selected Files">
+
+</p></form>
+
+
+
+
+
+</body></html>
